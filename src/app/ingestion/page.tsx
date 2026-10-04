@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { PlatformConnectorCards } from '@/components/ingestion/PlatformConnectorCards';
+import { YouTubeLiveStudio } from '@/components/ingestion/YouTubeLiveStudio';
 import { RateLimitDashboard } from '@/components/ingestion/RateLimitDashboard';
 import { LiveStreamConsole } from '@/components/ingestion/LiveStreamConsole';
 import { DatasetUploadModal } from '@/components/ingestion/DatasetUploadModal';
@@ -29,6 +30,9 @@ export default function IngestionPage() {
 
       {/* 6 Platform Connector Cards */}
       <PlatformConnectorCards />
+
+      {/* Live YouTube Data API v3 Studio & Comments Analyzer */}
+      <YouTubeLiveStudio />
 
       {/* Enterprise Rate Limiting & Token Quota Dashboard */}
       <RateLimitDashboard />

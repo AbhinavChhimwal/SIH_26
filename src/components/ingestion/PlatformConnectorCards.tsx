@@ -102,19 +102,26 @@ export const PlatformConnectorCards: React.FC = () => {
 
                   <span
                     className={`rounded-md border px-1.5 py-0.5 text-[9px] font-bold ${
-                      c.status === 'connected'
+                      c.platform === 'youtube'
+                        ? 'border-red-500/40 bg-red-500/20 text-red-300'
+                        : c.status === 'connected'
                         ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
                         : 'border-blue-500/30 bg-blue-500/10 text-blue-400'
                     }`}
                   >
-                    {c.status.toUpperCase()}
+                    {c.platform === 'youtube' ? 'LIVE API KEY' : c.status.toUpperCase()}
                   </span>
                 </div>
 
-                <div className="mt-2.5">
+                <div className="mt-2.5 flex flex-wrap gap-1">
                   <span className={`rounded border px-2 py-0.5 text-[9px] font-bold ${priority.color}`}>
                     {priority.label}
                   </span>
+                  {c.platform === 'youtube' && (
+                    <span className="rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 text-[9px] font-mono font-bold text-red-400">
+                      v3 Key: AIzaSy...4KmfAyQ
+                    </span>
+                  )}
                 </div>
               </div>
 

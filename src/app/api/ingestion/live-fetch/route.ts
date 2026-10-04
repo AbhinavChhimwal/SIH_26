@@ -3,6 +3,8 @@ import {
   fetchLiveTwitterPosts,
   fetchLiveYouTubeComments,
   fetchLiveRedditPosts,
+  fetchLiveTelegramUpdates,
+  fetchLiveHackerNewsPosts,
 } from '@/lib/services/liveApiConnectors';
 import { SocialPost } from '@/lib/types';
 import { extractTrendsFromPosts } from '@/lib/services/trendService';
@@ -16,24 +18,52 @@ export async function GET(request: NextRequest) {
   const query = searchParams.get('query') || 'AI tech';
 
   const collectedPosts: SocialPost[] = [];
+  const sourcesContacted: string[] = [];
 
   try {
-    // 1. Reddit (Works immediately with zero auth keys)
+    // 1. Live Public Hacker News Stream (100% Free, ZERO keys required, ALWAYS works live!)
+    if (platform === 'all' || platform === 'reddit') {
+      const hnPosts = await fetchLiveHackerNewsPosts();
+      if (hnPosts.length > 0) {
+        collectedPosts.push(...hnPosts);
+        sourcesContacted.push('HackerNews (Live Public Firebase API)');
+      }
+    }
+
+    // 2. Reddit OAuth (Works if REDDIT_CLIENT_ID & REDDIT_CLIENT_SECRET are set)
     if (platform === 'all' || platform === 'reddit') {
       const redditPosts = await fetchLiveRedditPosts('technology');
-      collectedPosts.push(...redditPosts);
+      if (redditPosts.length > 0) {
+        collectedPosts.push(...redditPosts);
+        sourcesContacted.push('Reddit (Live OAuth Stream)');
+      }
     }
 
-    // 2. Twitter / X (Uses TWITTER_BEARER_TOKEN if configured)
-    if (platform === 'all' || platform === 'x') {
-      const twitterPosts = await fetchLiveTwitterPosts(query);
-      collectedPosts.push(...twitterPosts);
-    }
-
-    // 3. YouTube (Uses YOUTUBE_API_KEY if configured)
+    // 3. YouTube (Works if YOUTUBE_API_KEY is configured)
     if (platform === 'all' || platform === 'youtube') {
       const youtubeComments = await fetchLiveYouTubeComments();
-      collectedPosts.push(...youtubeComments);
+      if (youtubeComments.length > 0) {
+        collectedPosts.push(...youtubeComments);
+        sourcesContacted.push('YouTube Data API v3 (Live Comments)');
+      }
+    }
+
+    // 4. Telegram Bot API (Works if TELEGRAM_BOT_TOKEN is configured)
+    if (platform === 'all' || platform === 'telegram') {
+      const telegramPosts = await fetchLiveTelegramUpdates();
+      if (telegramPosts.length > 0) {
+        collectedPosts.push(...telegramPosts);
+        sourcesContacted.push('Telegram Bot API (Live Channel Updates)');
+      }
+    }
+
+    // 5. Twitter / X (Works if TWITTER_BEARER_TOKEN is configured)
+    if (platform === 'all' || platform === 'x') {
+      const twitterPosts = await fetchLiveTwitterPosts(query);
+      if (twitterPosts.length > 0) {
+        collectedPosts.push(...twitterPosts);
+        sourcesContacted.push('X (Twitter API v2)');
+      }
     }
 
     const trends = extractTrendsFromPosts(collectedPosts);
@@ -43,6 +73,7 @@ export async function GET(request: NextRequest) {
       success: true,
       count: collectedPosts.length,
       isRealExternalData: collectedPosts.length > 0,
+      sourcesContacted,
       posts: collectedPosts,
       trends,
       demographics,
